@@ -1,28 +1,41 @@
 <template>
-  <div @keyup="keyupAction" @keydown="keydownAction" @click="changeCursorAction">
-    <div class="line" v-for="(line, row) in code" :key="line.id" :data="row">
-      <div class="block" v-for="(block, col) in line.children" v-text="block.text" :contenteditable="force||(active[0]===row&&active[1]===col)" :key="block.id" :data="col"></div>
+  <div class="edit-content">
+    <div @keyup="keyupAction" @keydown="keydownAction" @click="changeCursorAction" @mouseover="overViewAction">
+      <component :is="line.type" class="line" v-for="(line, row) in code" :key="line.id" :data="row" :class="{active: active[1]===-1&&active[0]===row}">
+        <component :is="block.type" class="block" v-for="(block, col) in line.children" v-text="block.text" :contenteditable="force||(active[0]===row&&active[1]===col)" :class="{active: active[0]===row&&active[1]===col}" :key="block.id" :data="col"></component>
+      </component>
+    </div>
+    <div class="over" ref="over" :style="{left: over.left + 'px', top: over.top + 'px', width: over.width + 'px', height: over.height + 'px', display: over.display}">
+      这个是标题
+      <a href="#"><i class="fab fas fa-trash"></i></a>
     </div>
   </div>
 </template>
 
 <script>
+  import Markdown from './markdown'
+
   export default {
     data () {
       return {
         force: true,
         nextId: 2,
         active: [0, 0],
-        code: [{id: 0, children: [{id: 1, text: 'hello....'}]}]
+        code: [{id: 0, type: 'div', children: [{id: 1, type: 'div', text: 'hello....'}]}],
+        markdown: new Markdown(),
+        over: {
+          display: 'none',
+          left: 0,
+          top: 0,
+          width: 100,
+          height: 30
+        }
       }
     },
     mounted () {
-      this.test()
+      this.markdown.demo()
     },
     methods: {
-      test () {
-        window.console.log('xxxx')
-      },
       keydownAction (e) {
         if (e.keyCode === 13) {
           e.preventDefault()
@@ -58,14 +71,14 @@
 
           this.$set(this.code[y].children[x], 'text', txt.substring(0, range.startOffset))
 
-          const newChildren = [{id: this.nextId++, text: txt.substring(range.startOffset)}]
+          const newChildren = [{id: this.nextId++, type: 'div', text: txt.substring(range.startOffset)}]
           window.console.log(txt.substring(0, range.startOffset), txt.substring(range.startOffset))
           if (this.code[y].children.length - 1 > x) {
             const children = this.code[y].children.slice(x + 1)
             this.$set(this.code[y], 'children', this.code[y].children.slice(0, x + 1))
-            this.code.splice(y + 1, 0, {id: this.nextId++, children: newChildren.concat(children)})
+            this.code.splice(y + 1, 0, {id: this.nextId++, type: 'div', children: newChildren.concat(children)})
           } else {
-            this.code.splice(y + 1, 0, {id: this.nextId++, children: newChildren})
+            this.code.splice(y + 1, 0, {id: this.nextId++, type: 'div', children: newChildren})
           }
           this.active[0] = y + 1
           this.active[1] = 0
@@ -93,6 +106,32 @@
           // window.document.elementFromPoint(502, 153).click()
         }
       },
+      overViewAction (e) {
+        if (e.target.classList.contains('block')) {
+          this.over.display = 'block'
+          const parentNode = e.target.parentNode
+
+          // this.over.width = e.target.clientWidth
+          // this.over.height = e.target.clientHeight
+          this.over.left = e.target.offsetLeft + parentNode.offsetLeft
+          this.over.top = e.target.offsetTop + parentNode.offsetTop - 30
+
+          this.$set(this.active, 1, parseInt(e.target.getAttribute('data')))
+          this.$set(this.active, 0, parseInt(e.target.parentNode.getAttribute('data')))
+        } else if (e.target.classList.contains('line')) {
+          this.over.display = 'block'
+
+          // this.over.width = e.target.clientWidth
+          // this.over.height = e.target.clientHeight
+          this.over.left = e.target.offsetLeft
+          this.over.top = e.target.offsetTop - 30
+
+          this.$set(this.active, 1, -1)
+          this.$set(this.active, 0, parseInt(e.target.getAttribute('data')))
+        } else {
+          this.over.display = 'none'
+        }
+      },
       keepLastIndex (obj) {
         if (window.getSelection) {
           obj.focus()
@@ -112,5 +151,10 @@
 
 <style scoped="true">
   div { border: none; outline: none; }
+  .edit-content { position: relative; }
+  .over { border: solid 1px #EEE; position: absolute; background: #2680eb; color: white; padding: 5px; font-size: 0.8em; }
+  .over a { color: white; }
+  .active:after { content: ""; border: 1px dashed #2680eb; position: absolute; width: 100%; height: 100%; left: 0; top: 0; pointer-events: none; display: block; }
+  .line, .block { position: relative; }
   .block { display: inline-block; min-width: 5px; }
 </style>
