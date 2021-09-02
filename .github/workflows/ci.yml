@@ -19,8 +19,9 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages
-          folder: build
+          folder: dist
           clean: true
           clean-exclude: |
             special-file.txt
             some/*.txt
+          ssh-key: ${{ secrets.ACCESS_TOKEN }}
