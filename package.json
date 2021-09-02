@@ -1,16 +1,17 @@
 {
-  "name": "fangxiaorong",
+  "name": "testvue",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.0.4"
+    "vue": "^3.2.6"
   },
   "devDependencies": {
-    "vite": "^1.0.0-rc.13",
-    "@vue/compiler-sfc": "^3.0.4"
-  },
-  "homepage": "https://fangxiaorong.github.io/github-actions-build"
+    "@vitejs/plugin-vue": "^1.6.0",
+    "@vue/compiler-sfc": "^3.2.6",
+    "vite": "^2.5.2"
+  }
 }
