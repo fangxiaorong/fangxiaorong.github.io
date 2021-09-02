@@ -1,5 +1,5 @@
 <template>
-  <img alt="Vue" src="./assets/logo.png" />
+  <img alt="Vue " src="./assets/logo.png" />
   <HelloWorld msg="Hello Vue 3.0 + Vite" />
 </template>
 
